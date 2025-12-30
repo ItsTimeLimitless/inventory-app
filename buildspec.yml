@@ -1,4 +1,5 @@
 version: 0.2
+
 phases:
   pre_build:
     commands:
@@ -6,7 +7,7 @@ phases:
       - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 641053169437.dkr.ecr.us-east-2.amazonaws.com
       - REPOSITORY_URI=641053169437.dkr.ecr.us-east-2.amazonaws.com/inventory-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
- build:
+  build:
     commands:
       - echo Build started on `date`
       - echo Compiling the Java code...
@@ -22,5 +23,7 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
       - printf '[{"name":"inventory-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+
 artifacts:
-    files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
