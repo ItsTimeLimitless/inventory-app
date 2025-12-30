@@ -8,24 +8,18 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 641053169437.dkr.ecr.us-east-2.amazonaws.com
-      - REPOSITORY_URI=641053169437.dkr.ecr.us-east-2.amazonaws.com/inventory-app
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
-      - echo Build started on `date`
-      - echo Compiling the Java code...
+      - echo Building Java...
       - mvn clean package -DskipTests
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo Building Docker...
+      - docker build -t 641053169437.dkr.ecr.us-east-2.amazonaws.com/inventory-app:latest .
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"inventory-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Pushing Docker...
+      - docker push 641053169437.dkr.ecr.us-east-2.amazonaws.com/inventory-app:latest
+      - echo Creating artifact...
+      - printf '[{"name":"inventory-container","imageUri":"641053169437.dkr.ecr.us-east-2.amazonaws.com/inventory-app:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
