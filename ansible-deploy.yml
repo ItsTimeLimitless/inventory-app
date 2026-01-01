@@ -1,5 +1,5 @@
 ---
-- name: Deploy Inventory App
+- name: Deploy Inventory App Locally
   hosts: localhost
   become: yes
   tasks:
@@ -9,16 +9,10 @@
         state: absent
       ignore_errors: yes
 
-    - name: Pull latest image
-      docker_image:
-        name: "admin/inventory-app:latest"
-        source: pull
-        force_source: yes
-
     - name: Run the container
       docker_container:
         name: inventory-app
-        image: "admin/inventory-app:latest"
+        image: "inventory-app:latest"
         state: started
         restart_policy: always
         ports:
