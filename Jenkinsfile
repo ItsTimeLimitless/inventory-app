@@ -1,10 +1,14 @@
 pipeline {
     agent any
     
+    tools {
+        maven 'maven3'
+    }
+
     environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub-login' // You will set this ID in Jenkins later
+        DOCKERHUB_CREDENTIALS = 'dockerhub-login'
         APP_NAME = 'inventory-app'
-        DOCKER_USER = 'your-dockerhub-username' 
+        DOCKER_USER = 'admin' 
     }
     
     stages {
@@ -20,26 +24,20 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Build & Push Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_USER}/${APP_NAME}:${BUILD_NUMBER} ."
-                sh "docker tag ${DOCKER_USER}/${APP_NAME}:${BUILD_NUMBER} ${DOCKER_USER}/${APP_NAME}:latest"
-            }
-        }
-        
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                    sh "echo $PASS | docker login -u $USER --password-stdin"
-                    sh "docker push ${DOCKER_USER}/${APP_NAME}:${BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_USER}/${APP_NAME}:latest"
+                script {
+                    sh "docker build -t ${DOCKER_USER}/${APP_NAME}:latest ."
+                    withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        sh "docker push ${DOCKER_USER}/${APP_NAME}:latest"
+                    }
                 }
             }
         }
         
         stage('Deploy with Ansible') {
             steps {
-                // This triggers the Ansible playbook we are about to create
                 sh 'ansible-playbook -i inventory.ini ansible-deploy.yml'
             }
         }
