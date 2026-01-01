@@ -1,28 +1,25 @@
 ---
-- name: Deploy BankPro Inventory App
-  hosts: aws_server
+- name: Deploy Inventory App
+  hosts: localhost
   become: yes
   tasks:
-    - name: Install Docker if not present
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
-
-    - name: Pull latest Docker image
-      docker_image:
-        name: "your-dockerhub-username/inventory-app:latest"
-        source: pull
-
-    - name: Stop existing container
+    - name: Stop and remove existing container
       docker_container:
         name: inventory-app
         state: absent
+      ignore_errors: yes
 
-    - name: Run new container
+    - name: Pull latest image
+      docker_image:
+        name: "admin/inventory-app:latest"
+        source: pull
+        force_source: yes
+
+    - name: Run the container
       docker_container:
         name: inventory-app
-        image: "your-dockerhub-username/inventory-app:latest"
+        image: "admin/inventory-app:latest"
         state: started
+        restart_policy: always
         ports:
-          - "8089:8080" # Maps AWS port 8089 to App port 8080
+          - "8089:8080"
