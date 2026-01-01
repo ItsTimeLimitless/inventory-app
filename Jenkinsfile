@@ -6,9 +6,7 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub-login'
         APP_NAME = 'inventory-app'
-        DOCKER_USER = 'admin' 
     }
     
     stages {
@@ -24,15 +22,10 @@ pipeline {
             }
         }
         
-        stage('Build & Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_USER}/${APP_NAME}:latest ."
-                    withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                        sh "echo $PASS | docker login -u $USER --password-stdin"
-                        sh "docker push ${DOCKER_USER}/${APP_NAME}:latest"
-                    }
-                }
+                // We just build it locally and keep it on this machine
+                sh "docker build -t ${APP_NAME}:latest ."
             }
         }
         
