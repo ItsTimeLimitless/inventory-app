@@ -1,14 +1,7 @@
-# Use Amazon Corretto (OpenJDK) from the ECR Public Gallery to avoid Docker Hub limits
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:17-al2-jdk
-
-# Set the working directory
+# Use a smaller runtime image to save disk space
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# Copy the JAR file (we saw it exists in your logs as inventory-app-0.0.1-SNAPSHOT.jar)
+# Copy the jar file from the target folder
 COPY target/*.jar app.jar
-
-# Expose the port
 EXPOSE 8080
-
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
